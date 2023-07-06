@@ -14,16 +14,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <build>
-        <directory>${project.basedir}/target</directory>
         <finalName>${project.artifactId}</finalName>
-        <outputDirectory>${project.build.directory}</outputDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.cashmanager.main</mainClass>
+                            <mainClass>org.cashmanager.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
