@@ -3,7 +3,8 @@ Example Java CLI application serving as a cash manager in a vending machine
 
 Uses Maven build manager and compiles to single runnable jar (target/cashmanager-jar-with-dependencies.jar)
 
-build with: mvn clean install
+Build with: mvn clean install
+
 Run with: java --jar target/cashmanager-jar-with-dependencies.jar gbp [denominationCounts [runForUserInput]]
 
 when providing denominationCounts it should be formatted like the following: 
