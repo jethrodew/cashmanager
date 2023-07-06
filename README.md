@@ -1,4 +1,4 @@
-# cashmanager
+# Cash Manager
 Example Java CLI application serving as a cash manager in a vending machine
 
 Uses Maven build manager and compiles to single runnable jar (target/cashmanager-jar-with-dependencies.jar)
