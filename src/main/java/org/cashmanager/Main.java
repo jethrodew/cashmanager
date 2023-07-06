@@ -1,9 +1,9 @@
 package org.cashmanager;
 
-import org.cashmanager.core.CashManagerImpl;
-import org.cashmanager.contract.Currency;
 import org.cashmanager.cli.CLIRunner;
 import org.cashmanager.cli.CLIUtil;
+import org.cashmanager.contract.Currency;
+import org.cashmanager.core.CashManagerImpl;
 
 import java.util.Map;
 import java.util.Scanner;
@@ -59,11 +59,7 @@ public class Main {
             switch (splitCommand[0].toLowerCase()) {
                 case "help" -> cliRunner.printHelp();
                 case "status" -> CLIUtil.printStatus(cashManager);
-                case "reset" ->
-
-                        cliRunner.processReset(splitCommand);
-
-
+                case "reset" -> cliRunner.processReset(splitCommand);
                 case "add" -> cliRunner.processAdd(splitCommand);
                 case "transaction" -> cliRunner.processTransaction(splitCommand);
                 case "dispense" -> cliRunner.processDispense(splitCommand);
