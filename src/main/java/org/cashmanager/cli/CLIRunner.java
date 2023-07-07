@@ -112,8 +112,7 @@ public class CLIRunner {
     }
 
     public void processAdd(final Integer denomination) {
-        Integer count = getDenominationCountFromInput(denomination);
-        cashManager.addCoins(denomination, count);
+        cashManager.addCoins(Map.of(denomination, 1));
     }
 
     public void processAdd(final String rawDenominationCounts) {
@@ -126,7 +125,7 @@ public class CLIRunner {
     }
 
     public void processAdd(final Integer denomination, final Integer count) {
-        cashManager.addCoins(denomination, count);
+        cashManager.addCoins(Map.of(denomination, count));
     }
 
     public void processTransaction(final String[] splitCommand) {
