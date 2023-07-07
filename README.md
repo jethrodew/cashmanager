@@ -1,6 +1,9 @@
 # Cash Manager
 Example Java CLI application serving as a cash manager in a vending machine
 
+Java 17
+Maven 3.9.3
+
 Uses Maven build manager and compiles to single runnable jar (target/cashmanager-jar-with-dependencies.jar)
 
 Build with: mvn clean install
