@@ -5,6 +5,7 @@ import org.cashmanager.cli.CLIUtil;
 import org.cashmanager.contract.Currency;
 import org.cashmanager.core.CashManagerImpl;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -23,7 +24,9 @@ public class Main {
 
         Map<Integer, Integer> denominationCount;
         try {
-            denominationCount = CLIUtil.processRawDenominations(args[1], currency);
+            denominationCount = args.length > 1
+                    ? CLIUtil.processRawDenominations(args[1], currency)
+                    : Collections.EMPTY_MAP;
         } catch (Throwable e) {
             System.out.println(e.getMessage());
             System.exit(1);
@@ -40,10 +43,10 @@ public class Main {
         }
         CLIUtil.printStatus(cashManager);
 
-        boolean allowManualRunning = Boolean.TRUE.toString().equalsIgnoreCase(args[2]);
+        boolean allowManualRunning = args.length == 1 || args.length == 3 && Boolean.TRUE.toString().equalsIgnoreCase(args[2]);
         if (allowManualRunning) {
             CLIRunner cliRunner = new CLIRunner(scanner, cashManager, currency);
-            if (denominationCount.isEmpty()) {
+            if (args.length == 3 && denominationCount.isEmpty()) {
                 cashManager.addCoins(cliRunner.getCashFromInput());
             }
             initiateManualRunner(cashManager, cliRunner);
@@ -57,14 +60,13 @@ public class Main {
             String command = scanner.nextLine();
             String[] splitCommand = command.split(" ");
             switch (splitCommand[0].toLowerCase()) {
-                case "help" -> cliRunner.printHelp();
                 case "status" -> CLIUtil.printStatus(cashManager);
                 case "reset" -> cliRunner.processReset(splitCommand);
                 case "add" -> cliRunner.processAdd(splitCommand);
                 case "transaction" -> cliRunner.processTransaction(splitCommand);
-                case "dispense" -> cliRunner.processDispense(splitCommand);
+                case "remove" -> cliRunner.processRemove(splitCommand);
                 case "exit" -> System.exit(0);
-                default -> System.exit(1);
+                default -> System.out.println("Sorry, I didn't understand that command. Please try again.\n");
             }
         }
     }

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 import static org.cashmanager.util.Validators.lessThanZero;
 import static org.cashmanager.util.Validators.zeroOrLess;
@@ -54,19 +53,6 @@ public class CLIRunner {
         return count;
     }
 
-    public void printHelp() {
-        String[] helpArray =
-                {
-                        "help - commands",
-                        "\"status\": Prints the current status of the cash float",
-                        "\"reset [denomination:count,denomination2:count2]\": Clears and replaces the contents of the cash float with the provided values. If no data provided, will request user input.",
-                        "\"add [denomination:count[,denomination2:count2]]\": Adds the provided denomination counts to the existing cash float. Can provide just one e.g. 100:5 (5 £1 coins) or multiple values. If no data provided will request user input.",
-                        "\"transaction [cost denomination:count[,denomination2:count2]]\": initiates a new transaction from cost and denominationCounts provided or takes user input."
-                };
-
-        Stream.of(helpArray).forEach(System.out::println);
-    }
-
     public void processReset(final String[] splitCommand) {
         Map<Integer, Integer> denominationCounts;
 
@@ -77,30 +63,36 @@ public class CLIRunner {
             denominationCounts = getCashFromInput();
         }
 
-        cashManager.resetCoins(denominationCounts);
-        System.out.println("Reset Complete!");
+        try {
+            cashManager.resetCoins(denominationCounts);
+            System.out.println("Reset Complete!");
+        } catch (Throwable e) {
+            System.out.println("Unable to reset float." + e.getMessage());
+        }
         CLIUtil.printStatus(cashManager);
     }
 
     public void processAdd(final String[] command) {
-
-        //command[0] contains the "add" command text
-        switch (command.length) {
-            case 3 -> {
-                Integer denomination = Integer.parseInt(command[1]);
-                Integer count = Integer.parseInt(command[2]);
-                processAdd(denomination, count);
-            }
-            case 2 -> {
-                try {
+        try {
+            switch (command.length) {
+                case 3 -> {
                     Integer denomination = Integer.parseInt(command[1]);
-                    processAdd(denomination);
-                } catch (NumberFormatException e) {
-                    //Contains a String
-                    processAdd(command[1]);
+                    Integer count = Integer.parseInt(command[2]);
+                    processAdd(denomination, count);
                 }
+                case 2 -> {
+                    try {
+                        Integer denomination = Integer.parseInt(command[1]);
+                        processAdd(denomination);
+                    } catch (NumberFormatException e) {
+                        //Contains a String
+                        processAdd(command[1]);
+                    }
+                }
+                default -> processAdd();
             }
-            default -> processAdd();
+        } catch (Throwable e) {
+            System.out.printf("Unable to process add. %s", e.getMessage());
         }
 
         CLIUtil.printStatus(cashManager);
@@ -116,12 +108,8 @@ public class CLIRunner {
     }
 
     public void processAdd(final String rawDenominationCounts) {
-        try {
-            Map<Integer, Integer> denominationCounts = CLIUtil.processRawDenominations(rawDenominationCounts, currency);
-            cashManager.addCoins(denominationCounts);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+        Map<Integer, Integer> denominationCounts = CLIUtil.processRawDenominations(rawDenominationCounts, currency);
+        cashManager.addCoins(denominationCounts);
     }
 
     public void processAdd(final Integer denomination, final Integer count) {
@@ -138,12 +126,14 @@ public class CLIRunner {
             coinTransaction = getTransactionInfoFromUser();
         }
 
-        Map<Integer, Integer> change = cashManager.processTransaction(coinTransaction);
-        System.out.println("Calculated Change: ");
-        CLIUtil.printDenominationCount(cashManager, change);
-
-        System.out.println("\nFloat Balance:");
-        CLIUtil.printStatus(cashManager);
+        try {
+            Map<Integer, Integer> change = cashManager.processTransaction(coinTransaction);
+            System.out.println("Calculated Change: ");
+            CLIUtil.printDenominationCount(cashManager, change);
+            CLIUtil.printStatus(cashManager);
+        } catch (Throwable e) {
+            System.out.println("Unable to process add." + e.getMessage());
+        }
     }
 
     private CoinTransaction getTransactionInfoFromUser() {
@@ -185,7 +175,7 @@ public class CLIRunner {
         return coinTransaction;
     }
 
-    public void processDispense(String[] splitCommand) {
+    public void processRemove(String[] splitCommand) {
         if (splitCommand.length == 2) {
             try {
                 Integer amountToDispense = Integer.parseInt(splitCommand[1]);
@@ -195,6 +185,7 @@ public class CLIRunner {
                 Map<Integer, Integer> coinsToDispense = CLIUtil.processRawDenominations(splitCommand[1], currency);
                 cashManager.removeCoins(coinsToDispense);
             }
+            CLIUtil.printStatus(cashManager);
         } else {
             System.out.println("No coins specified.");
         }

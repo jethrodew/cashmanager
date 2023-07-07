@@ -36,7 +36,10 @@ public class CLIUtil {
 
     public static void printStatus(final CashManager cashManager) {
         Map<Integer, Integer> floatStatus = cashManager.getDenominationCounts();
+        System.out.println("\n--- Current Balance ---");
         printDenominationCount(cashManager, floatStatus);
+        System.out.println("\n----------------------");
+
     }
 
     public static void printDenominationCount(final CashManager cashManager, final Map<Integer, Integer> denominationCount) {
