@@ -7,8 +7,10 @@ Build with: mvn clean install
 
 Run with: java --jar target/cashmanager-jar-with-dependencies.jar gbp [denominationCounts [runForUserInput]]
 
-when providing denominationCounts it should be formatted like the following: 
+When providing denominationCounts it should be formatted like the following: 
 200:5,100:10,50:10
+e.g.
+5 x £2, 10 x £1, 10 x 50p
 
 Will fail if you provide denominations which do not match the currency (Currently only GBP)
 Denominations should be provided as pence value i.e 200 = £2
