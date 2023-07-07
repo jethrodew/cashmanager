@@ -38,6 +38,6 @@ public enum Currency {
        return Arrays.stream(Currency.values())
               .filter(currency -> currency.name.equalsIgnoreCase(requestedCurrencyName))
               .findFirst()
-               .orElseThrow(()-> new IllegalArgumentException("101: Unexpected currency encountered"));
+               .orElseThrow(()-> new IllegalArgumentException("Unexpected currency encountered"));
     }
 }

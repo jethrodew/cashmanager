@@ -110,6 +110,11 @@ public class CashFloatTest {
     }
 
     @Test
+    void addCoins_should_throw_iae_when_denominationCounts_null(){
+        assertThrows(IllegalArgumentException.class, ()->cashFloat.addCoins(null));
+    }
+
+    @Test
     void addCoins_should_throw_npe_when_denomination_null() {
         assertThrows(NullPointerException.class, () -> cashFloat.addCoins(Map.of(null, count)));
     }
@@ -132,6 +137,11 @@ public class CashFloatTest {
     @Test
     void addCoins_should_throw_iae_when_denomination_zero() {
         assertThrows(IllegalArgumentException.class, () -> cashFloat.addCoins(Map.of(0, count)));
+    }
+
+    @Test
+    void addCoins_should_throw_iae_when_denomination_not_in_currency(){
+        assertThrows(IllegalArgumentException.class, ()->cashFloat.addCoins(Map.of(13, 10)));
     }
 
     @Test
@@ -167,6 +177,11 @@ public class CashFloatTest {
     }
 
     @Test
+    void removeCoins_should_throw_iae_when_denominationCounts_null(){
+        assertThrows(IllegalArgumentException.class, ()->cashFloat.addCoins(null));
+    }
+
+    @Test
     void removeCoins_should_remove_coin_count_for_each_denomination_when_called_with_zero_or_above_zero() {
         Map<Integer, Integer> existingCounts = cashFloat.getDenominationCounts();
 
@@ -197,6 +212,11 @@ public class CashFloatTest {
         coinsToRemove3.put(null, 3);
         coinsToRemove3.put(denomination2, 0);
         assertThrows(NullPointerException.class, () -> cashFloat.removeCoins(coinsToRemove3));
+    }
+
+    @Test
+    void removeCoins_should_throw_iae_when_denomination_not_in_currency(){
+        assertThrows(IllegalArgumentException.class, ()->cashFloat.removeCoins(Map.of(13, 10)));
     }
 
     @Test
