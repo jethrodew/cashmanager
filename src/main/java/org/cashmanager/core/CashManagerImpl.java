@@ -3,11 +3,11 @@ package org.cashmanager.core;
 import org.cashmanager.CashManager;
 import org.cashmanager.contract.CoinTransaction;
 import org.cashmanager.contract.Currency;
+import org.cashmanager.core.calculator.ChangeCalculator;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.cashmanager.core.ChangeCalculator.calculateChange;
 import static org.cashmanager.util.Validators.validateDenominationCurrency;
 
 public class CashManagerImpl implements CashManager {
@@ -62,7 +62,7 @@ public class CashManagerImpl implements CashManager {
             return Collections.EMPTY_MAP;
         }
 
-        Map<Integer, Integer> calculatedChange = calculateChange(cashFloat.getDenominationCounts(), valueTotal);
+        Map<Integer, Integer> calculatedChange = new ChangeCalculator().calculateChange(cashFloat.getDenominationCounts(), valueTotal);
         cashFloat.removeCoins(calculatedChange);
         return calculatedChange;
     }
