@@ -1,11 +1,8 @@
 package org.cashmanager.core.calculator;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.IntStream;
 
-import static org.cashmanager.util.ProcessDenominationCounts.combineDenominationCounts;
 import static org.cashmanager.util.ProcessDenominationCounts.filterEmptyAndAddToTree;
 
 public class ChangeCalculator {
@@ -16,9 +13,12 @@ public class ChangeCalculator {
      * This means that we can specify the order that we work through them in as some Map implementations are not sorted.
      * Throws an @IllegalStateException if it is unable to calculate a solution
      *
-     * The cheapest solution is to go down through the coin denomination values to work out the minimum number of coins, so we do that first.
-     * If that fails to get the whole amount, we pop one of the lowest denomination out of the calculated change and recalculate just the remainder working from the bottom up.
-     * This repeats for each denomination found in the change until there are none left.
+     * The cheapest solution is to go down through the coin denomination values to work out the minimum number of coins expecting that there will be enough of them all to find suitable change
+     * If we still can't solve it. We will need to investigate every possible
+     *
+     * Attempt 1 - O(n) where n = denominations and most common solve will happen in less than 10 operations
+     * Attempt 2 - O(2n*n) where n = denominations as it must compute every possible combination of coins against other coins before it retrieves the answer because we want the shortest path
+     *
      *
      * This algorithm has a gap which exists in the middle values i.e 111 when the float is short of coins (50:3,20:3,5:1,2:1,1:1)
      * The initial pass will attempt 50:2 and then add all the denominations  below 20 but because there are not enough coins to make up the remaining 11 it will fail.
@@ -33,74 +33,33 @@ public class ChangeCalculator {
     public Map<Integer, Integer> calculateChange(final Map<Integer, Integer> floatDenominationCounts, final int valueTotal) {
         TreeMap<Integer, Integer> availableDenominationCounts = filterEmptyAndAddToTree(floatDenominationCounts);
 
-        ChangeCalculatorResult changeCalculatorResult = calculateChange(availableDenominationCounts, availableDenominationCounts.descendingKeySet(), valueTotal);
+        ChangeCalculatorResult changeCalculatorResult = calculateChangeDescendingLinearly(new TreeMap<>(availableDenominationCounts), valueTotal);
 
         if (changeCalculatorResult.getRemainingAmount() != 0) {
             if (changeCalculatorResult.getCalculatedChange().isEmpty()) {
-                throw new IllegalStateException(String.format("No coins available to make the exact change: %s", valueTotal));
-            }
-
-            changeCalculatorResult = recalculateChange(changeCalculatorResult, availableDenominationCounts);
-            if (changeCalculatorResult == null) {
                 throw new IllegalStateException(String.format("Not enough coins available to make the exact change: %s", valueTotal));
             }
+            List<Map<Integer, Integer>> correctChanges = new ArrayList<>();
+
+            List<Integer> denominationsToBranch = availableDenominationCounts.keySet().stream()
+                    .filter(denomination -> denomination < valueTotal)
+                    .sorted(Comparator.reverseOrder())
+                    .toList();
+
+            calculateChangeBranch(correctChanges, availableDenominationCounts, denominationsToBranch, valueTotal, new HashMap<>());
+
+            return correctChanges.stream().min(Comparator.comparingInt(Map::size))
+                    .orElseThrow(() -> new IllegalStateException(String.format("Not enough coins available to make the exact change: %s", valueTotal)));
         }
 
         return changeCalculatorResult.getCalculatedChange();
     }
 
-    private ChangeCalculatorResult recalculateChange(final ChangeCalculatorResult existingChangeCalculatorResult, final TreeMap<Integer, Integer> availableDenominationCounts) {
-        Iterator<Integer> denominationIterator = existingChangeCalculatorResult.getCalculatedChange().keySet().iterator();
-
-        int newRemainingAmount = existingChangeCalculatorResult.getRemainingAmount();
-        TreeMap<Integer, Integer> currentlyCalculatedChange = new TreeMap<>(existingChangeCalculatorResult.getCalculatedChange());
-
-        TreeMap<Integer, Integer> currentlyAvailableDenominationCounts = new TreeMap<>(availableDenominationCounts);
-        currentlyCalculatedChange.keySet().forEach(denomination -> {
-            int newCount = currentlyAvailableDenominationCounts.get(denomination) - currentlyCalculatedChange.get(denomination);
-            currentlyAvailableDenominationCounts.put(denomination, newCount);
-        });
-
-        ChangeCalculatorResult changeCalculatorResult;
-
-        while (denominationIterator.hasNext()) {
-            int lowestDenomination = denominationIterator.next();
-            int lowestDenominationCount = existingChangeCalculatorResult.getCalculatedChange().get(lowestDenomination);
-
-            // Remove one of the lowest denomination from the calculated change
-            currentlyCalculatedChange.put(lowestDenomination, lowestDenominationCount - 1);
-
-            // Add one of the lowest denomination to our cached float state to ensure we're still working with the correct total
-            int newCurrentlyAvailableLowestDenominationCountInFloat = currentlyAvailableDenominationCounts.get(lowestDenomination) + 1;
-            currentlyAvailableDenominationCounts.put(lowestDenomination, newCurrentlyAvailableLowestDenominationCountInFloat);
-
-            // Add the lowestDenomination to the remaining amount to calculate change for
-            newRemainingAmount += lowestDenomination;
-
-            // Calculate change for the remaining amount
-            changeCalculatorResult = calculateChange(currentlyAvailableDenominationCounts, currentlyAvailableDenominationCounts.keySet(), newRemainingAmount);
-
-            if (changeCalculatorResult.getRemainingAmount() == 0) {
-                //Found a solution!
-                return new ChangeCalculatorResult(0, combineDenominationCounts(currentlyCalculatedChange, changeCalculatorResult.getCalculatedChange()));
-            }
-        }
-
-        /*
-         * We've popped one of each denomination off and still can't make the change working from lowest denomination first - give up
-         */
-        return null;
-    }
-
-
-    private ChangeCalculatorResult calculateChange(final TreeMap<Integer, Integer> availableDenominationCounts,
-                                                   final Set<Integer> sortedDenominations,
-                                                   final int valueTotal) {
+    private ChangeCalculatorResult calculateChangeDescendingLinearly(final TreeMap<Integer, Integer> availableDenominationCounts, final int valueTotal) {
         TreeMap<Integer, Integer> calculatedChange = new TreeMap<>();
         int remainingAmount = valueTotal;
 
-
-        for (int denomination : sortedDenominations) {
+        for (int denomination : availableDenominationCounts.descendingKeySet()) {
             int count = availableDenominationCounts.get(denomination);
 
             if (remainingAmount >= denomination && count > 0) {
@@ -118,5 +77,28 @@ public class ChangeCalculator {
         }
 
         return new ChangeCalculatorResult(remainingAmount, calculatedChange);
+    }
+
+    private void calculateChangeBranch(final List<Map<Integer, Integer>> correctChanges, final Map<Integer, Integer> availableDenominationCounts,
+                                       final List<Integer> orderedDenominationsToBranch, final Integer currentAmount, final Map<Integer, Integer> currentChange) {
+
+        int currentDenomination = orderedDenominationsToBranch.get(0);
+        int maxNumOfCoins = Math.min(availableDenominationCounts.get(currentDenomination), currentAmount / currentDenomination);
+
+        IntStream.range(0, maxNumOfCoins+1).forEach(currentDenominationCount -> {
+            Map<Integer, Integer> newCurrentChange = new HashMap<>(currentChange);
+            newCurrentChange.put(currentDenomination, currentDenominationCount);
+            int newCurrentAmount = currentAmount - currentDenomination * currentDenominationCount;
+
+            if (newCurrentAmount == 0) {
+                correctChanges.add(newCurrentChange);
+                return;
+            }
+
+            if (currentDenomination != orderedDenominationsToBranch.get(orderedDenominationsToBranch.size()-1)) {
+                List<Integer> nextDenominations = orderedDenominationsToBranch.subList(1, orderedDenominationsToBranch.size());
+                calculateChangeBranch(correctChanges, availableDenominationCounts, nextDenominations, newCurrentAmount, newCurrentChange);
+            }
+        });
     }
 }

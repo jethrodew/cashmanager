@@ -1,6 +1,5 @@
 package org.cashmanager.core.calculator;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -61,7 +60,7 @@ public class ChangeCalculatorTest {
     }
 
     @Test
-    void calculateChange_should_return_all_coins_when_top_down_denomination_match_fails_and_search_for_higher_number_recalculate() {
+    void calculateChange_should_return_all_coins_when_top_down_denomination_match_fails_and_must_search_for_recalculation() {
         Map<Integer, Integer> floatDenominationCounts = Map.of(200, 1, 100, 1, 50, 1, 20, 1, 10, 1, 5, 1, 2, 3);
         int total = 71;
 
@@ -74,9 +73,8 @@ public class ChangeCalculatorTest {
         assertEquals(3, result.get(2));
     }
 
-    @Disabled("The algorithm is unable to solve this because there are not enough coins at both the top and bottom end.")
     @Test
-    void calculateChange_should_return_all_coins_when_top_down_denomination_match_fails_and_search_for_higher_number_recalculate_even_higher() {
+    void calculateChange_should_return_all_coins_when_top_down_denomination_match_fails_and_must_search_for_higher_number_recalculation() {
         Map<Integer, Integer> floatDenominationCounts = Map.of(50, 3, 20, 3, 5, 1, 2, 1, 1, 1);
         int total = 111;
 

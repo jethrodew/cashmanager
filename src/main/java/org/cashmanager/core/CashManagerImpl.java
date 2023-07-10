@@ -8,6 +8,7 @@ import org.cashmanager.core.calculator.ChangeCalculator;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.cashmanager.util.Validators.lessThanZero;
 import static org.cashmanager.util.Validators.validateDenominationCurrency;
 
 public class CashManagerImpl implements CashManager {
@@ -46,7 +47,7 @@ public class CashManagerImpl implements CashManager {
                 .sum();
 
         int changeTotal = totalCoinValue - coinTransaction.getCost();
-        if (changeTotal < 0) {
+        if (lessThanZero(changeTotal)) {
             throw new IllegalArgumentException("Insufficient coins provided to cover cost");
         }
         cashFloat.addCoins(coinTransaction.getCoinsProvided());
@@ -55,7 +56,7 @@ public class CashManagerImpl implements CashManager {
 
     @Override
     public Map<Integer, Integer> removeCoins(final Integer valueTotal) {
-        if (valueTotal < 0) {
+        if (lessThanZero(valueTotal)) {
             throw new IllegalArgumentException("Total to remove cannot be below 0");
         }
         if (valueTotal == 0) {
