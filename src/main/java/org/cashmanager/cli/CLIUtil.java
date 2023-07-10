@@ -3,11 +3,38 @@ package org.cashmanager.cli;
 import org.cashmanager.CashManager;
 import org.cashmanager.contract.Currency;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static org.cashmanager.util.Validators.lessThanZero;
 
 public class CLIUtil {
+
+    public static Map<Integer, Integer> getCashFromInput(final Scanner scanner, final Currency currency) {
+        Map<Integer, Integer> denominationCounts = new HashMap<>();
+        currency.getDenominations().forEach(denomination ->
+                denominationCounts.put(denomination, getDenominationCountFromInput(scanner, currency, denomination)));
+        return denominationCounts;
+    }
+
+    private static Integer getDenominationCountFromInput(final Scanner scanner, final Currency currency, final Integer denomination) {
+        System.out.printf("Enter coin count for %s%.2f:%n", currency.getSymbol(), denomination / 100.0);
+
+        Integer count = null;
+        while (count == null) {
+            try {
+                Integer readCount = scanner.nextInt();
+                if (lessThanZero(readCount)) {
+                    throw new InputMismatchException();
+                } else {
+                    count = readCount;
+                }
+            } catch (InputMismatchException e) {
+                scanner.next();
+                System.out.println("Please enter a number greater than or equal to 0.\n");
+            }
+        }
+        return count;
+    }
 
     public static Map<Integer, Integer> processRawDenominations(final String rawDenominations, final Currency currency) {
         Map<Integer, Integer> denominationCount = new HashMap<>();

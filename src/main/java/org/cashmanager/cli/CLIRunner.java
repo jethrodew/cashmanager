@@ -4,12 +4,12 @@ import org.cashmanager.CashManager;
 import org.cashmanager.contract.CoinTransaction;
 import org.cashmanager.contract.Currency;
 
-import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
-import static org.cashmanager.util.Validators.lessThanZero;
+import static org.cashmanager.cli.CLIUtil.getCashFromInput;
+import static org.cashmanager.cli.CLIUtil.processRawDenominations;
 import static org.cashmanager.util.Validators.zeroOrLess;
 
 /**
@@ -26,41 +26,14 @@ public class CLIRunner {
         this.currency = currency;
     }
 
-    public Map<Integer, Integer> getCashFromInput() {
-        Map<Integer, Integer> denominationCounts = new HashMap<>();
-        currency.getDenominations().forEach(denomination ->
-                denominationCounts.put(denomination, getDenominationCountFromInput(denomination)));
-        return denominationCounts;
-    }
-
-    private Integer getDenominationCountFromInput(final Integer denomination) {
-        System.out.printf("Enter coin count for %s%.2f:%n", currency.getSymbol(), denomination / 100.0);
-
-        Integer count = null;
-        while (count == null) {
-            try {
-                Integer readCount = scanner.nextInt();
-                if (lessThanZero(readCount)) {
-                    throw new InputMismatchException();
-                } else {
-                    count = readCount;
-                }
-            } catch (InputMismatchException e) {
-                scanner.next();
-                System.out.println("Please enter a number greater than or equal to 0.\n");
-            }
-        }
-        return count;
-    }
-
     public void processReset(final String[] splitCommand) {
         Map<Integer, Integer> denominationCounts;
 
         if (splitCommand.length == 2) {
             String rawDenominationCounts = splitCommand[1];
-            denominationCounts = CLIUtil.processRawDenominations(rawDenominationCounts, currency);
+            denominationCounts = processRawDenominations(rawDenominationCounts, currency);
         } else {
-            denominationCounts = getCashFromInput();
+            denominationCounts = getCashFromInput(scanner, currency);
         }
 
         try {
@@ -99,8 +72,7 @@ public class CLIRunner {
     }
 
     public void processAdd() {
-        Map<Integer, Integer> denominationCounts = getCashFromInput();
-        cashManager.addCoins(denominationCounts);
+        cashManager.addCoins(getCashFromInput(scanner, currency));
     }
 
     public void processAdd(final Integer denomination) {
@@ -108,8 +80,7 @@ public class CLIRunner {
     }
 
     public void processAdd(final String rawDenominationCounts) {
-        Map<Integer, Integer> denominationCounts = CLIUtil.processRawDenominations(rawDenominationCounts, currency);
-        cashManager.addCoins(denominationCounts);
+        cashManager.addCoins(processRawDenominations(rawDenominationCounts, currency));
     }
 
     public void processAdd(final Integer denomination, final Integer count) {
@@ -121,7 +92,7 @@ public class CLIRunner {
         if (splitCommand.length == 3) {
             Integer cost = Integer.parseInt(splitCommand[1]);
             String rawDenominationCounts = splitCommand[2];
-            coinTransaction = new CoinTransaction(cost, CLIUtil.processRawDenominations(rawDenominationCounts, currency));
+            coinTransaction = new CoinTransaction(cost, processRawDenominations(rawDenominationCounts, currency));
         } else {
             coinTransaction = getTransactionInfoFromUser();
         }
@@ -175,14 +146,14 @@ public class CLIRunner {
         return coinTransaction;
     }
 
-    public void processRemove(String[] splitCommand) {
+    public void processRemove(final String[] splitCommand) {
         if (splitCommand.length == 2) {
             try {
                 Integer amountToDispense = Integer.parseInt(splitCommand[1]);
                 cashManager.removeCoins(amountToDispense);
             } catch (NumberFormatException e) {
                 //Contains a String
-                Map<Integer, Integer> coinsToDispense = CLIUtil.processRawDenominations(splitCommand[1], currency);
+                Map<Integer, Integer> coinsToDispense = processRawDenominations(splitCommand[1], currency);
                 cashManager.removeCoins(coinsToDispense);
             }
             CLIUtil.printStatus(cashManager);

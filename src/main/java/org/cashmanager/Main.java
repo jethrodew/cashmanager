@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Scanner;
 
+import static org.cashmanager.cli.CLIUtil.getCashFromInput;
+
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -43,11 +45,12 @@ public class Main {
         }
         CLIUtil.printStatus(cashManager);
 
+        // Run manually if only currency provided or argument passed
         boolean allowManualRunning = args.length == 1 || args.length == 3 && Boolean.TRUE.toString().equalsIgnoreCase(args[2]);
         if (allowManualRunning) {
             CLIRunner cliRunner = new CLIRunner(scanner, cashManager, currency);
             if (args.length == 3 && denominationCount.isEmpty()) {
-                cashManager.addCoins(cliRunner.getCashFromInput());
+                cashManager.addCoins(getCashFromInput(scanner, currency));
             }
             initiateManualRunner(cashManager, cliRunner);
         }
