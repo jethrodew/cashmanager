@@ -19,12 +19,7 @@ public class ChangeCalculator {
      * Attempt 1 - O(n) where n = denominations and most common solve will happen in less than 10 operations
      * Attempt 2 - O(2n*n) where n = denominations as it must compute every possible combination of coins against other coins before it retrieves the answer because we want the shortest path
      *
-     *
-     * This algorithm has a gap which exists in the middle values i.e 111 when the float is short of coins (50:3,20:3,5:1,2:1,1:1)
-     * The initial pass will attempt 50:2 and then add all the denominations  below 20 but because there are not enough coins to make up the remaining 11 it will fail.
-     * The second pass will attempt to solve the remaining 3 by remove the 1, then the 2, then the 5 but because the algorithm attempts to add values to make up ascending it will reach the same value
-     *
-     * After all of this if it has not found a solution, it will throw an IllegalStateException as there are not enough coins available to process the transaction
+     * If it cannot find a solution, it will throw an IllegalStateException as there are not enough coins available to process the transaction
      *
      * @param floatDenominationCounts - currently available denomination counts in the cash float
      * @param valueTotal              - total target value of the change e.g. 75
