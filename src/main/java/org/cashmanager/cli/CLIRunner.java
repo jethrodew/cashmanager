@@ -25,15 +25,14 @@ public class CLIRunner {
 
     public void processReset(final String[] splitCommand) {
         Map<Integer, Integer> denominationCounts;
-
-        if (splitCommand.length == 2) {
-            String rawDenominationCounts = splitCommand[1];
-            denominationCounts = processRawDenominations(rawDenominationCounts, currency);
-        } else {
-            denominationCounts = getCashFromInput(scanner, currency);
-        }
-
         try {
+            if (splitCommand.length == 2) {
+                String rawDenominationCounts = splitCommand[1];
+                denominationCounts = processRawDenominations(rawDenominationCounts, currency);
+            } else {
+                denominationCounts = getCashFromInput(scanner, currency);
+            }
+
             cashManager.resetCoins(denominationCounts);
             System.out.println("Reset Complete!");
         } catch (Throwable e) {
@@ -79,7 +78,6 @@ public class CLIRunner {
                 cashTransaction = getTransactionInfoFromUser(scanner, currency);
             }
 
-
             Map<Integer, Integer> change = cashManager.processTransaction(cashTransaction);
             System.out.println("Calculated Change: ");
             CLIUtil.printDenominationCount(cashManager.getCurrency(), change);
@@ -102,7 +100,7 @@ public class CLIRunner {
                     Map<Integer, Integer> coinsToDispense = processRawDenominations(splitCommand[1], currency);
                     cashManager.removeCoins(coinsToDispense);
                 }
-            } catch(Throwable e){
+            } catch (Throwable e) {
                 System.out.println("Error encountered when removing counts" + e.getMessage());
             }
             CLIUtil.printStatus(cashManager);

@@ -54,6 +54,19 @@ public class CLIRunnerTest {
     }
 
     @Test
+    void processReset_should_catch_when_reset_coins_throws_exception() {
+        String[] splitCommand = Arrays.asList("reset", "200:1,100:3,50:10").toArray(new String[2]);
+
+        doThrow(new IllegalArgumentException()).when(cashManager).resetCoins(anyMap());
+        cliRunner.processReset(splitCommand);
+
+        doThrow(new NullPointerException()).when(cashManager).resetCoins(anyMap());
+        cliRunner.processReset(splitCommand);
+
+        verify(cashManager,times(2)).resetCoins(anyMap());
+    }
+
+    @Test
     void processAdd_should_add_when_called_with_denomination_and_count() {
         String[] splitCommand = Arrays.asList("add", "20", "3").toArray(new String[3]);
         ArgumentCaptor<Map<Integer, Integer>> denominationCountCaptor = ArgumentCaptor.forClass(Map.class);
@@ -98,6 +111,19 @@ public class CLIRunnerTest {
     }
 
     @Test
+    void processAdd_should_catch_when_add_coins_throws_exception() {
+        String[] splitCommand = Arrays.asList("add", "200:1,100:3,50:10").toArray(new String[2]);
+
+        doThrow(new IllegalArgumentException()).when(cashManager).addCoins(anyMap());
+        cliRunner.processAdd(splitCommand);
+
+        doThrow(new NullPointerException()).when(cashManager).addCoins(anyMap());
+        cliRunner.processAdd(splitCommand);
+
+        verify(cashManager,times(2)).addCoins(anyMap());
+    }
+
+    @Test
     void processTransaction_should_capture_cost_and_raw_denomination_counts_and_submit_transaction_when_called() {
         String[] splitCommand = Arrays.asList("transaction", "45", "20:1,10:3,5:1").toArray(new String[3]);
         ArgumentCaptor<CashTransaction> transactionCaptor = ArgumentCaptor.forClass(CashTransaction.class);
@@ -114,6 +140,19 @@ public class CLIRunnerTest {
         assertEquals(1, denominationCountCaptured.get(20));
         assertEquals(3, denominationCountCaptured.get(10));
         assertEquals(1, denominationCountCaptured.get(5));
+    }
+
+    @Test
+    void processTransaction_should_catch_when_transaction_throws_exception() {
+        String[] splitCommand = Arrays.asList("transaction", "33","10:3,5:1").toArray(new String[2]);
+
+        doThrow(new IllegalArgumentException()).when(cashManager).processTransaction(any(CashTransaction.class));
+        cliRunner.processTransaction(splitCommand);
+
+        doThrow(new NullPointerException()).when(cashManager).processTransaction(any(CashTransaction.class));
+        cliRunner.processTransaction(splitCommand);
+
+        verify(cashManager,times(2)).processTransaction(any(CashTransaction.class));
     }
 
     @Test
