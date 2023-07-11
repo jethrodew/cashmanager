@@ -1,7 +1,7 @@
 package org.cashmanager.core;
 
 import org.cashmanager.CashManager;
-import org.cashmanager.contract.CoinTransaction;
+import org.cashmanager.contract.CashTransaction;
 import org.cashmanager.contract.Currency;
 import org.cashmanager.core.calculator.ChangeCalculator;
 
@@ -41,16 +41,16 @@ public class CashManagerImpl implements CashManager {
     }
 
     @Override
-    public Map<Integer, Integer> processTransaction(final CoinTransaction coinTransaction) {
-        final Integer totalCoinValue = coinTransaction.getCoinsProvided().entrySet().stream()
+    public Map<Integer, Integer> processTransaction(final CashTransaction cashTransaction) {
+        final Integer totalCoinValue = cashTransaction.getCoinsProvided().entrySet().stream()
                 .mapToInt(entry -> entry.getKey() * entry.getValue())
                 .sum();
 
-        int changeTotal = totalCoinValue - coinTransaction.getCost();
+        int changeTotal = totalCoinValue - cashTransaction.getCost();
         if (lessThanZero(changeTotal)) {
             throw new IllegalArgumentException("Insufficient coins provided to cover cost");
         }
-        cashFloat.addCoins(coinTransaction.getCoinsProvided());
+        cashFloat.addCoins(cashTransaction.getCoinsProvided());
         return removeCoins(changeTotal);
     }
 

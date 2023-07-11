@@ -1,7 +1,7 @@
 package org.cashmanager.core;
 
 import org.cashmanager.CashManager;
-import org.cashmanager.contract.CoinTransaction;
+import org.cashmanager.contract.CashTransaction;
 import org.cashmanager.contract.Currency;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,9 +117,9 @@ public class CashManagerTest {
         assertEquals(count, existingFloatContents.get(denomination));
         assertEquals(count2, existingFloatContents.get(denomination2));
 
-        CoinTransaction coinTransaction = new CoinTransaction(30, Map.of(20, 2));
+        CashTransaction cashTransaction = new CashTransaction(30, Map.of(20, 2));
 
-        Map<Integer, Integer> change = cashManager.processTransaction(coinTransaction);
+        Map<Integer, Integer> change = cashManager.processTransaction(cashTransaction);
 
         assertEquals(1, change.size());
         assertEquals(1, change.get(10), "Failed to return correct change");
@@ -135,9 +135,9 @@ public class CashManagerTest {
         assertEquals(count, existingFloatContents.get(denomination));
         assertEquals(count2, existingFloatContents.get(denomination2));
 
-        CoinTransaction coinTransaction = new CoinTransaction(30, Map.of(20, 1));
+        CashTransaction cashTransaction = new CashTransaction(30, Map.of(20, 1));
 
-        assertThrows(IllegalArgumentException.class, () -> cashManager.processTransaction(coinTransaction));
+        assertThrows(IllegalArgumentException.class, () -> cashManager.processTransaction(cashTransaction));
 
         Map<Integer, Integer> newFloatContents = cashManager.getDenominationCounts();
         assertEquals(2, newFloatContents.size());

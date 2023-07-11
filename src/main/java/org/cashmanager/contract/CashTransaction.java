@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * POJO storing details for a transaction
  */
-public class CoinTransaction {
+public class CashTransaction {
 
     /**
      * Total Purchase Cost
@@ -20,12 +20,12 @@ public class CoinTransaction {
     private final Map<Integer, Integer> coinsProvided;
 
 
-    public CoinTransaction(Integer cost) {
+    public CashTransaction(Integer cost) {
         this.cost = cost;
         coinsProvided = new HashMap<>();
     }
 
-    public CoinTransaction(Integer cost, Map<Integer, Integer> coinsProvided) {
+    public CashTransaction(Integer cost, Map<Integer, Integer> coinsProvided) {
         this.cost = cost;
         this.coinsProvided = coinsProvided;
     }

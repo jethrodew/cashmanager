@@ -1,6 +1,6 @@
 package org.cashmanager;
 
-import org.cashmanager.contract.CoinTransaction;
+import org.cashmanager.contract.CashTransaction;
 import org.cashmanager.contract.Currency;
 
 import java.util.Map;
@@ -41,10 +41,10 @@ public interface CashManager {
     /**
      * Processes a transaction, updating the float with the provided coins and deducting the change necessary.
      *
-     * @param coinTransaction - @{CoinTransaction} instance which has a cost and the provided set of coins
+     * @param cashTransaction - @{CoinTransaction} instance which has a cost and the provided set of coins
      * @return coins to dispense as change as Map<Denomination, Count> e.g. <200, 10> = 10 £2 coins
      */
-    Map<Integer, Integer> processTransaction(CoinTransaction coinTransaction);
+    Map<Integer, Integer> processTransaction(CashTransaction cashTransaction);
 
     /**
      * Calculates a total coin value which would exactly match the value total provided and then removes it from the float
